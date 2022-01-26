@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:int="http://www.springframework.org/schema/integration"
+  xmlns:int-jpa="http://www.springframework.org/schema/integration/jpa"
+  xsi:schemaLocation="http://www.springframework.org/schema/integration https://www.springframework.org/schema/integration/spring-integration.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/integration/jpa https://www.springframework.org/schema/integration/jpa/spring-integration-jpa.xsd">
+
+  <int:channel id="createMemberRequestChannel"/>
+
+  <int:channel id="listMemberRequestChannel"/>
+
+  <int:gateway id="memberService"
+    service-interface="com.example.springintegrationjpa.service.MemberService"
+    default-request-timeout="5000" default-reply-timeout="5000">
+    <int:method name="createMember" request-channel="createMemberRequestChannel"/>
+    <int:method name="findAllMember"   request-channel="listMemberRequestChannel"/>
+  </int:gateway>
+
+  <int-jpa:retrieving-outbound-gateway entity-manager-factory="entityManagerFactory"
+    request-channel="listMemberRequestChannel"
+    jpa-query="select * from MEMBER">
+  </int-jpa:retrieving-outbound-gateway>
+
+  <int-jpa:updating-outbound-gateway entity-manager-factory="entityManagerFactory"
+    request-channel="createMemberRequestChannel" >
+    <int-jpa:transactional transaction-manager="transactionManager" />
+  </int-jpa:updating-outbound-gateway>
+
+</beans>
